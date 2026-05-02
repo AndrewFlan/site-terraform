@@ -1,0 +1,33 @@
+name: Lint
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    tflint:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Install Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                  terraform_version: "1.6.0"
+
+            - name: Install tflint
+              uses: terraform-linters/setup-tflint@v4
+              with:
+                  tflint_version: "v0.55.0"
+
+            - name: Init tflint
+              run: tflint --init
+
+            - name: Run tflint
+              run: tflint --format compact
