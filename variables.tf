@@ -21,8 +21,7 @@ variable "domain_name" {
   type        = string
 }
 
-variable "ssh_public_key_path" {
-  description = "Path to SSH public key file"
+variable "ssh_public_key" {
+  description = "SSH public key contents for EC2 key pair"
   type        = string
-  default     = "~/.ssh/my-website.pub"
 }

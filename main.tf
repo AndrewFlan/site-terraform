@@ -32,7 +32,7 @@ provider "aws" {
 # SSH Key Pair
 resource "aws_key_pair" "this" {
   key_name   = "${var.project_name}-key"
-  public_key = file(var.ssh_public_key_path)
+  public_key = var.ssh_public_key
 }
 
 # Look up the latest Ubuntu 24.04 LTS AMI automatically

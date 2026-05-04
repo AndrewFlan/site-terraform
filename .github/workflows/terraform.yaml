@@ -45,9 +45,12 @@ jobs:
               run: terraform init
 
             - name: Terraform Plan
-              run: terraform plan -var="domain_name=andrewflanigan.com"
+              run: terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+                  -var="domain_name=andrewflanigan.com"
 
             # Only apply on push to main, not on pull requests
             - name: Terraform Apply
               if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-              run: terraform apply -auto-approve -var="domain_name=andrewflanigan.com"
+              run: terraform apply -auto-approve -var="ssh_public_key=${{
+                  secrets.SSH_PUBLIC_KEY }}"
+                  -var="domain_name=andrewflanigan.com"
