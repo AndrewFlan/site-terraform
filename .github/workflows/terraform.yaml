@@ -1,0 +1,47 @@
+name: Terraform
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+# Required for OIDC
+permissions:
+    id-token: write
+    contents: read
+
+jobs:
+    terraform:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Configure AWS credentials via OIDC
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+                  aws-region: us-east-1
+
+            - name: Install Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                  terraform_version: "1.10.0"
+
+            - name: Terraform Init
+              run: terraform init
+
+            - name: Terraform Plan
+              run: terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+                  -var="domain_name=andrewflanigan.com"
+
+            # Only apply on push to main, not on pull requests
+            - name: Terraform Apply
+              if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+              run: terraform apply -auto-approve -var="ssh_public_key=${{
+                  secrets.SSH_PUBLIC_KEY }}"
+                  -var="domain_name=andrewflanigan.com"
