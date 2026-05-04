@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.10.0"
 
   required_providers {
     aws = {
@@ -8,19 +8,18 @@ terraform {
     }
   }
 
-  # Remote state in S3 (uncomment after creating the bucket manually)
-  # backend "s3" {
-  #   bucket         = "yourname-terraform-state"
-  #   key            = "my-website/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "terraform-state-lock"
-  #   encrypt        = true
-  # }
+  # Remote state in S3
+  backend "s3" {
+    bucket         = "andrewflanigan-terraform-state"
+    key            = "my-website/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-lock"
+    encrypt        = true
+  }
 }
 
 provider "aws" {
-  region  = var.aws_region
-  profile = "personal-site"
+  region = var.aws_region
 
   default_tags {
     tags = {
@@ -33,7 +32,7 @@ provider "aws" {
 # SSH Key Pair
 resource "aws_key_pair" "this" {
   key_name   = "${var.project_name}-key"
-  public_key = file(var.ssh_public_key_path)
+  public_key = var.ssh_public_key
 }
 
 # Look up the latest Ubuntu 24.04 LTS AMI automatically
