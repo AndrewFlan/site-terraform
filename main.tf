@@ -8,14 +8,14 @@ terraform {
     }
   }
 
-  # Remote state in S3 (uncomment after creating the bucket manually)
-  # backend "s3" {
-  #   bucket         = "yourname-terraform-state"
-  #   key            = "my-website/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "terraform-state-lock"
-  #   encrypt        = true
-  # }
+  # Remote state in S3
+  backend "s3" {
+    bucket         = "andrewflanigan-terraform-state"
+    key            = "my-website/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-lock"
+    encrypt        = true
+  }
 }
 
 provider "aws" {
