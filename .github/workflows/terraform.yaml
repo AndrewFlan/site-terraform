@@ -27,15 +27,6 @@ jobs:
                   role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
                   aws-region: us-east-1
 
-            # Cache for faster workflow
-            - name: Cache Terraform providers
-              uses: actions/cache@v4
-              with:
-                  path: ~/.terraform.d/plugin-cache
-                  key: terraform-providers-${{ hashFiles('**/.terraform.lock.hcl') }}
-                  restore-keys: |
-                      terraform-providers-
-
             - name: Install Terraform
               uses: hashicorp/setup-terraform@v3
               with:
@@ -43,8 +34,6 @@ jobs:
 
             - name: Terraform Init
               run: terraform init
-              env:
-                  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
 
             - name: Terraform Plan
               run: terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
