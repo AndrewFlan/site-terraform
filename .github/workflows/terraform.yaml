@@ -43,6 +43,8 @@ jobs:
 
             - name: Terraform Init
               run: terraform init
+              env:
+                  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
 
             - name: Terraform Plan
               run: terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
