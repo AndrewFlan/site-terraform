@@ -52,6 +52,30 @@ resource "aws_iam_role_policy_attachment" "ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+resource "aws_iam_role_policy" "ssm_s3" {
+  name = "s3-site-deploy"
+  role = aws_iam_role.ssm.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "S3SiteDeploy"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::andrewflanigan-terraform-state",
+          "arn:aws:s3:::andrewflanigan-terraform-state/site-deploy/*"
+        ]
+      }
+    ]
+  })
+}
+
 # SSH Key Pair
 resource "aws_key_pair" "this" {
   key_name   = "${var.project_name}-key"
