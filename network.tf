@@ -1,7 +1,7 @@
 # Security Group for EC2 instance
 resource "aws_security_group" "web" {
   name        = "${var.project_name}-web-sg"
-  description = "Allow HTTP, and HTTPS inbound"
+  description = "Allow SSH, HTTP, and HTTPS inbound"
 
   # HTTP
   ingress {
