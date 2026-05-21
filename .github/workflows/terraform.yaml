@@ -42,7 +42,6 @@ jobs:
                   terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
                   -var="domain_name=andrewflanigan.com" \
                   -out=tfplan 2>&1 | tee plan_output.txt
-                  echo "exitcode=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
             - name: Comment plan on PR
               if: github.event_name== 'pull_request'
