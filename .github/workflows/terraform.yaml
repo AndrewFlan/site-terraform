@@ -12,6 +12,7 @@ on:
 permissions:
     id-token: write
     contents: read
+    pull-requests: write
 
 jobs:
     terraform:
@@ -38,12 +39,52 @@ jobs:
 
             - name: Terraform Plan
               run:
-                  terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
-                  -var="domain_name=andrewflanigan.com"
+                  terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+                  -var="domain_name=andrewflanigan.com" \
+                  -out=tfplan 2>&1 | tee plan_output.txt
+                  echo "exitcode=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+            - name: Comment plan on PR
+              if: github.event_name== 'pull_request'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  PLAN=$(cat plan_output.txt)
+                  MARKER="<!-- terraform-plan -->"
+
+                  # Find existing comment ID if it exists
+                  COMMENT_ID=$(gh api \
+                    repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+                    --jq ".[] | select(.body | startswith(\"$MARKER\")) | .id" | head -1)
+
+                  BODY="$MARKER
+                  ## Terraform Plan
+                  \`\`\`hcl
+                  $PLAN
+                  \`\`\`"
+
+                  if [ -n "$COMMENT_ID" ]; then
+                      # Update existing comment
+                      gh api \
+                      repos/${{ github.repository }}/issues/comments/$COMMENT_ID \
+                      -X PATCH \
+                      -f body="$BODY"
+                  else
+                      # Create new comment
+                      gh pr comment ${{ github.event.pull_request.number }} --body "$BODY"
+                  fi
 
             # Only apply on push to main, not on pull requests
             - name: Terraform Apply
               if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-              run: terraform apply -auto-approve -var="ssh_public_key=${{
-                  secrets.SSH_PUBLIC_KEY }}"
-                  -var="domain_name=andrewflanigan.com"
+              run: terraform apply -auto-approve tfplan
+
+            - name: Update EC2 instance ID secret
+              if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+              env:
+                  GH_TOKEN: ${{ secrets.GH_PAT }}
+              run: |
+                  INSTANCE_ID=$(terraform output -raw instance_id)
+                  gh secret set EC2_INSTANCE_ID \
+                    --repo AndrewFlan/my-website \
+                    --body "$INSTANCE_ID"
