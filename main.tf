@@ -112,8 +112,8 @@ resource "aws_instance" "web" {
 
   root_block_device {
     volume_type = "gp3"
-    volume_size = 9
-    encrypted   = trued
+    volume_size = 8
+    encrypted   = true
   }
 
   metadata_options {
