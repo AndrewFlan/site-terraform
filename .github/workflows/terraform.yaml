@@ -38,10 +38,7 @@ jobs:
               run: terraform init
 
             - name: Terraform Plan
-              run:
-                  terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-                  -var="domain_name=andrewflanigan.com" \
-                  -out=tfplan 2>&1 | tee plan_output.txt
+              run: terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -var="domain_name=andrewflanigan.com" -out=tfplan 2>&1 | tee plan_output.txt
 
             - name: Comment plan on PR
               if: github.event_name== 'pull_request'
