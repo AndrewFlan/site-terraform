@@ -106,6 +106,10 @@ resource "aws_instance" "web" {
   vpc_security_group_ids = [aws_security_group.web.id]
   iam_instance_profile   = aws_iam_instance_profile.ssm.name
 
+  lifecycle {
+    ignore_changes = [ami]
+  }
+
   root_block_device {
     volume_type = "gp3"
     volume_size = 8
