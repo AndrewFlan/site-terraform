@@ -26,6 +26,7 @@ jobs:
               with:
                   role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
                   aws-region: us-east-1
+                  audience: sts.amazonaws.com
 
             - name: Install Terraform
               uses: hashicorp/setup-terraform@v4
@@ -36,7 +37,8 @@ jobs:
               run: terraform init
 
             - name: Terraform Plan
-              run: terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+              run:
+                  terraform plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
                   -var="domain_name=andrewflanigan.com"
 
             # Only apply on push to main, not on pull requests
